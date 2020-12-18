@@ -18,23 +18,9 @@ namespace ConstructionLine.CodingChallenge
 
         public SearchResults Search(SearchOptions options)
         {
-            // TODO: search logic goes here.
-            List<Shirt> colorMatch = _shirts.FindAll(s => options.Colors.Contains(s.Color));
-            List<Shirt> sizeMatch = _shirts.FindAll(s => options.Sizes.Contains(s.Size));
-
-            List<Shirt> result;
-            if (options.Colors == null || options.Colors.Count < 1)
-            {
-                result = sizeMatch.ToList();
-            }
-            else if (options.Sizes == null || options.Sizes.Count < 1)
-            {
-                result = colorMatch.ToList();
-            }
-            else
-            {
-                result = colorMatch.Intersect(sizeMatch).ToList();
-            }
+            List<Shirt> result = _shirts.FindAll(s => (!options.Colors.Any() || options.Colors.Contains(s.Color))
+                                                      && (!options.Sizes.Any() || options.Sizes.Contains(s.Size)))
+                .ToList();
 
             var colors = result.GroupBy(s => s.Color)
                 .Select(g => new ColorCount()
