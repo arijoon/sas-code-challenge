@@ -37,6 +37,7 @@ namespace ConstructionLine.CodingChallenge.Tests
                 var sizeCount = sizeCounts.SingleOrDefault(s => s.Size.Id == size.Id);
                 Assert.That(sizeCount, Is.Not.Null, $"Size count for '{size.Name}' not found in results");
 
+                // Bug fixed by addition of where statement. Only items matching search should be expected as count
                 var expectedSizeCount = shirts
                     .Where(s => !searchOptions.Sizes.Any() || searchOptions.Sizes.Contains(s.Size))
                     .Count(s => s.Size.Id == size.Id
@@ -57,6 +58,7 @@ namespace ConstructionLine.CodingChallenge.Tests
                 var colorCount = colorCounts.SingleOrDefault(s => s.Color.Id == color.Id);
                 Assert.That(colorCount, Is.Not.Null, $"Color count for '{color.Name}' not found in results");
 
+                // Bug fixed by addition of where statement. Only items matching search should be expected as count
                 var expectedColorCount = shirts
                     .Where(c => !searchOptions.Colors.Any() || searchOptions.Colors.Contains(c.Color))
                     .Count(c => c.Color.Id == color.Id  

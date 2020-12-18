@@ -12,7 +12,7 @@ namespace ConstructionLine.CodingChallenge
             _shirts = shirts;
 
             // TODO: data preparation and initialisation of additional data structures to improve performance goes here.
-
+            // Performance test runs under 10ms, therefore no additional improvements required
         }
 
 
