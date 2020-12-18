@@ -2,6 +2,10 @@
 
 The code challenge consists in the implementation of a simple search engine for shirts.
 
+## Solution
+
+This branch contains the most straightforward solution. A much more performant and optimized version is on branch `feature/add-index-perf` which takes advantage of indexing the shirts before performing search operations
+
 ## What to do?
 Shirts are in different sizes and colors. As described in the Size.cs class, there are three sizes: small, medium and large, and five different colors listed in Color.cs class.
 
