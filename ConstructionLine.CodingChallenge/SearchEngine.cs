@@ -6,47 +6,62 @@ namespace ConstructionLine.CodingChallenge
     public class SearchEngine
     {
         private readonly List<Shirt> _shirts;
+        private readonly Dictionary<Color, Dictionary<Size, List<Shirt>>> _searchIndex;
 
         public SearchEngine(List<Shirt> shirts)
         {
             _shirts = shirts;
-
-            // TODO: data preparation and initialisation of additional data structures to improve performance goes here.
-            // Performance test runs under 10ms, therefore no additional improvements required
+            _searchIndex = _shirts.GroupBy(s => s.Color).
+                ToDictionary(g => g.Key, g =>
+                    g.GroupBy(s => s.Size)
+                    .ToDictionary(gs => gs.Key, gs => gs.ToList()));
         }
 
 
         public SearchResults Search(SearchOptions options)
         {
-            List<Shirt> result = _shirts.FindAll(s => (!options.Colors.Any() || options.Colors.Contains(s.Color))
-                                                      && (!options.Sizes.Any() || options.Sizes.Contains(s.Size)))
-                .ToList();
 
-            var colors = result.GroupBy(s => s.Color)
-                .Select(g => new ColorCount()
+            var colors = options.Colors.Any() ? options.Colors : Color.All;
+            var sizes = options.Sizes.Any() ? options.Sizes : Size.All;
+
+            List<List<Shirt>> tmpResult = new List<List<Shirt>>();
+            Dictionary<Color, int> colorCount = Color.All.ToDictionary(g => g, g => 0);
+            Dictionary<Size, int> sizeCount = Size.All.ToDictionary(g => g, g => 0);
+
+            foreach (Color color in colors)
+            {
+                foreach (Size size in sizes)
                 {
-                    Color = g.Key,
-                    Count = g.Count()
-                });
+                    List<Shirt> matchingShirts = _searchIndex[color][size];
+                    colorCount[color] += matchingShirts.Count;
+                    sizeCount[size] += matchingShirts.Count;
 
-            var sizes = result.GroupBy(s => s.Size)
-                .Select(g => new SizeCount()
+                    tmpResult.Add(matchingShirts);
+                }
+            }
+
+            List<Shirt> result = tmpResult.SelectMany(s => s).ToList();
+
+            List<ColorCount> colorCounts = colorCount
+                .Select(c => new ColorCount()
                 {
-                    Size = g.Key,
-                    Count = g.Count()
-                });
+                    Color = c.Key,
+                    Count = c.Value
+                }).ToList();
 
-            var emptyColors = Color.All.Except(colors.Select(c => c.Color))
-                .Select(c => new ColorCount() {Color = c, Count = 0});
+            List<SizeCount> sizeCounts = sizeCount
+                .Select(s => new SizeCount()
+                {
+                    Size = s.Key,
+                    Count = s.Value
+                }).ToList();
 
-            var emptySizes = Size.All.Except(sizes.Select(s => s.Size))
-                .Select(s => new SizeCount() {Size = s, Count = 0});
 
             return new SearchResults
             {
                 Shirts = result,
-                ColorCounts = colors.Union(emptyColors).ToList(),
-                SizeCounts = sizes.Union(emptySizes).ToList()
+                ColorCounts = colorCounts,
+                SizeCounts = sizeCounts
             };
         }
     }
